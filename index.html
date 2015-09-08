@@ -7,44 +7,47 @@
       <link rel="stylesheet" href="">
       <script type="text/javascript" src="bower_components/phaser/build/phaser.js"></script>
       <script type="text/javascript">
-        var game = new Phaser.Game(480,640, Phaser.CANVAS, '', { preload: preload, create: create, update: update});
-        var playerBet, computerBet, ball;
-        var computerBetSpeed = 190;
-        var ballSpeed = 300;
+				var FIELD_WIDTH = 480;
+				var FIELD_HEIGHT = 640;
+
+        var BALL_SPEED = 300;
+
+				var PLAYER1_POSITION = FIELD_HEIGHT - 16;
+				var PLAYER2_POSITION = 16;
+
+        var game = new Phaser.Game(FIELD_WIDTH, FIELD_HEIGHT, Phaser.CANVAS, '', { preload: preload, create: create, update: update});
+        var player1, player2, ball;
         var ballReleased = false;
-        var playerBetHalfWidth;
 
         function preload () {
-          game.load.image('bet', 'assets/paddle.png');
+          game.load.image('player1', 'assets/player1.png');
+					game.load.image('player2', 'assets/player2.png');
           game.load.image('ball', 'assets/ball.png');
           game.load.image('background', 'assets/starfield.png');
         }
         function create () {
 					game.physics.startSystem(Phaser.Physics.ARCADE);
-          game.add.tileSprite(0,0,480,640,'background');
-          playerBet = createBet(game.world.centerX, 624);
-          computerBet = createBet(game.world.centerX, 16);
+          game.add.tileSprite(0,0,FIELD_WIDTH, FIELD_HEIGHT, 'background');
+          player1 = createPlayer(game.world.centerX, PLAYER1_POSITION, 'player1');
+          player2 = createPlayer(game.world.centerX, PLAYER2_POSITION, 'player2');
           ball = createBall(game.world.centerX, game.world.centerY);
-          playerBetHalfWidth = playerBet.width / 2;
           game.input.onDown.add(setBall, this);
         }
         function update () {
-          controlPlayerPaddle(game.input.x);
-          controlComputerPaddle();
-          processBallAndPaddleCollisions();
+          setPlayerPosition(game.input.x);
+          processBallAndPlayerCollisions();
           checkGoal();
-
         }
-        function createBet (x,y) {
-          var bet = game.add.sprite(x,y, 'bet');
-					game.physics.enable(bet, Phaser.Physics.ARCADE);
-          bet.anchor.setTo(0.5,0.5);
-					bet.enableBody = true;
-          bet.body.collideWorldBounds = true;
-          bet.body.bounce.setTo(1,1);
-          bet.body.immovable = true;
 
-          return bet;
+        function createPlayer(x, y, skin) {
+          var player = game.add.sprite(x,y, skin);
+					game.physics.enable(player, Phaser.Physics.ARCADE);
+          player.anchor.setTo(0.5,0.5);
+					player.enableBody = true;
+          player.body.collideWorldBounds = true;
+          player.body.bounce.setTo(1,1);
+          player.body.immovable = true;
+          return player;
         }
         function createBall (x,y) {
           var tmpBall = game.add.sprite(x,y, 'ball');
@@ -62,50 +65,44 @@
             ball.body.velocity.y = 0;
             ballReleased = false;
           } else {
-            ball.body.velocity.x = ballSpeed;
-            ball.body.velocity.y = -ballSpeed;
+            ball.body.velocity.x = BALL_SPEED;
+            ball.body.velocity.y = -BALL_SPEED;
             ballReleased = true;
           }
         }
-        function controlPlayerPaddle (x) {
-          playerBet.x = x;
 
-          if (playerBet.x < playerBetHalfWidth) {
-            playerBet.x = playerBetHalfWidth;
-          } else if (playerBet.x > game.width - playerBetHalfWidth) {
-            playerBet.x = game.width - playerBetHalfWidth;
-          }
+        function processBallAndPlayerCollisions () {
+          game.physics.arcade.collide(ball, player1, ballHitsPlayer, null, this);
+          game.physics.arcade.collide(ball, player2, ballHitsPlayer, null, this);
         }
-        function controlComputerPaddle () {
-          if (computerBet.x - ball.x < -15) {
-            computerBet.body.velocity.x = computerBetSpeed;
-          } else if(computerBet.x - ball.x > 15) {
-            computerBet.body.velocity.x = -computerBetSpeed;
-          } else {
-            computerBet.body.velocity.x = 0;
-          }
-        }
-        function processBallAndPaddleCollisions () {
-          game.physics.arcade.collide(ball, playerBet, ballHitsBet, null, this);
-          game.physics.arcade.collide(ball, computerBet, ballHitsBet, null, this);
-        }
-        function ballHitsBet (_ball, _bet) {
+
+        function ballHitsPlayer (ball, player) {
           var diff = 0;
 
-          if (_ball.x < _bet.x) {
-            diff = _bet.x - _ball.x;
-          } else if (_ball.x > _bet.x) {
-            diff = _ball.x - _bet.x;
-            _ball.body.velocity.x = (10*diff);
+          if (ball.x < player.x) {
+            diff = player.x - ball.x;
+          } else if (ball.x > player.x) {
+            diff = ball.x - player.x;
+            ball.body.velocity.x = (10*diff);
           } else {
-            _ball.body.velocity.x = 2 + Math.random() * 8;
+            ball.body.velocity.x = 2 + Math.random() * 8;
           }
         }
         function checkGoal () {
-          if (ball.y < 13) {
+          if (ball.y < ball.height) {
             setBall();
-          } else if (ball.y > 629) {
+          } else if (ball.y > FIELD_HEIGHT - ball.height) {
             setBall();
+          }
+        }
+
+        function setPlayerPosition(x) {
+					var player1HalfWidth = player1.width / 2;
+          player1.x = x;
+          if (player1.x < player1HalfWidth) {
+            player1.x = player1HalfWidth;
+          } else if (player1.x > game.width - player1HalfWidth) {
+            player1.x = game.width - player1HalfWidth;
           }
         }
       </script>
