@@ -20,6 +20,6 @@
     "tests"
   ],
   "dependencies": {
-    "phaser": "~1.1.2"
+    "phaser": "2.4.3"
   }
 }

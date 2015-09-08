@@ -7,7 +7,7 @@
       <link rel="stylesheet" href="">
       <script type="text/javascript" src="bower_components/phaser/build/phaser.js"></script>
       <script type="text/javascript">
-        var game = new Phaser.Game(480,640, Phaser.AUTO, '', { preload: preload, create: create, update: update});
+        var game = new Phaser.Game(480,640, Phaser.CANVAS, '', { preload: preload, create: create, update: update});
         var playerBet, computerBet, ball;
         var computerBetSpeed = 190;
         var ballSpeed = 300;
@@ -20,6 +20,7 @@
           game.load.image('background', 'assets/starfield.png');
         }
         function create () {
+					game.physics.startSystem(Phaser.Physics.ARCADE);
           game.add.tileSprite(0,0,480,640,'background');
           playerBet = createBet(game.world.centerX, 624);
           computerBet = createBet(game.world.centerX, 16);
@@ -36,7 +37,9 @@
         }
         function createBet (x,y) {
           var bet = game.add.sprite(x,y, 'bet');
+					game.physics.enable(bet, Phaser.Physics.ARCADE);
           bet.anchor.setTo(0.5,0.5);
+					bet.enableBody = true;
           bet.body.collideWorldBounds = true;
           bet.body.bounce.setTo(1,1);
           bet.body.immovable = true;
@@ -45,6 +48,7 @@
         }
         function createBall (x,y) {
           var tmpBall = game.add.sprite(x,y, 'ball');
+					game.physics.enable(tmpBall, Phaser.Physics.ARCADE);
           tmpBall.anchor.setTo(0.5,0.5);
           tmpBall.body.collideWorldBounds = true;
           tmpBall.body.bounce.setTo(1, 1);
@@ -82,8 +86,8 @@
           }
         }
         function processBallAndPaddleCollisions () {
-          game.physics.collide(ball, playerBet, ballHitsBet, null, this);
-          game.physics.collide(ball, computerBet, ballHitsBet, null, this);
+          game.physics.arcade.collide(ball, playerBet, ballHitsBet, null, this);
+          game.physics.arcade.collide(ball, computerBet, ballHitsBet, null, this);
         }
         function ballHitsBet (_ball, _bet) {
           var diff = 0;
