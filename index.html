@@ -2,7 +2,6 @@
   <html>
   <head>
       <meta charset="utf-8">
-      <meta http-equiv="X-UA-Compatible" content="IE=edge">
       <title>Phaser-pong</title>
       <link rel="stylesheet" href="">
       <script type="text/javascript" src="bower_components/phaser/build/phaser.js"></script>
@@ -34,10 +33,10 @@
 				// diese Funktion wird als aller erstes aufgerufen
         function preload () {
 					// läd die Grafik für spieler1
-          game.load.image('player1', 'assets/player1.png');
-					game.load.image('player2', 'assets/player2.png');
-          game.load.image('ball', 'assets/ball.png');
-          game.load.image('background', 'assets/starfield.png');
+          game.load.image('player1', 'images/player1.png');
+					game.load.image('player2', 'images/player2.png');
+          game.load.image('ball', 'images/ball.png');
+          game.load.image('background', 'images/starfield.png');
         }
 
 				// diese Funktion wird als zweites aufgerufen und erzeugt das Spiel, die Spieler und den Ball
