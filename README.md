@@ -1,2 +1,2 @@
-# Hackerschool Hamburg: Pong
+# Hackerschool Hamburg - Pong
 
