@@ -51,6 +51,8 @@ function create () {
 // Anlegen eines Spielers mit Position, Bild und zwei Tasten zur Steuerung
 function createPlayer(x, y, image, keyLeft, keyRight) {
 	var player = game.add.sprite(x, y, image);
+	// vergrößert/verkleinert den Spieler
+	player.scale.setTo(1, 1);
 	game.physics.enable(player, Phaser.Physics.ARCADE);
 	player.anchor.setTo(0.5, 0.5);
 	player.enableBody = true;
@@ -73,6 +75,8 @@ function createPlayer(x, y, image, keyLeft, keyRight) {
 // Anlegen des Balles an einer gegebenen Position
 function createBall(x, y) {
 	var ball = game.add.sprite(x, y, 'ball');
+	// vergrößert/verkleinert den Ball
+	ball.scale.setTo(1, 1);
 	game.physics.enable(ball, Phaser.Physics.ARCADE);
 	ball.anchor.setTo(0.5, 0.5);
 	ball.body.collideWorldBounds = true;
@@ -133,10 +137,10 @@ function playerShootsBall(player, ball) {
 // wenn ein Tor gefallen ist, wird die Funktion 'goalShotBy(player)' aufgerufen
 function checkIfGoal () {
 	// hat Speiler 1 (unten) ein Tor erzielt?
-	if (ball.y < ball.height) {
+	if (ball.y < ball.height / 2 + 1) {
 		goalShotBy(player1);
 	// hat Speiler 2 (oben) ein Tor erzielt?
-	} else if (ball.y > FIELD_HEIGHT - ball.height) {
+	} else if (ball.y > FIELD_HEIGHT - ball.height / 2 - 1) {
 		goalShotBy(player2);
 	}
 }
