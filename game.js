@@ -125,12 +125,8 @@ function checkIfPlayerShootsBall () {
 
 // Ein Spieler schießt den Ball zurück
 function playerShootsBall(player, ball) {
-	if (ball.x > player.x) {
-		var diff = ball.x - player.x;
-		ball.body.velocity.x = (10 * diff);
-	} else {
-		ball.body.velocity.x = 2 + Math.random() * 8;
-	}
+	var diff = ball.x - player.x;
+	ball.body.velocity.x = (10 * diff);
 }
 
 // hier wird geprüft, ob und für wen ein Tor gefallen ist
