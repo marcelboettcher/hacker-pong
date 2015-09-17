@@ -40,7 +40,7 @@ function create () {
 	// Spielfeld wird erstellt und die Grafik 'background' als Hintergrund genutzt
 	game.add.tileSprite(0,0,FIELD_WIDTH, FIELD_HEIGHT, 'background');
 	// Spieler1 wird erstellt und ihm werden zwei Tasten zur Steuerung zugewiesen
-	player1 = createPlayer(game.world.centerX, PLAYER1_POSITION, 'player1', Phaser.Keyboard.LEFT, Phaser.Keyboard.RIGHT);
+	// player1 = createPlayer(game.world.centerX, PLAYER1_POSITION, 'player1', Phaser.Keyboard.LEFT, Phaser.Keyboard.RIGHT);
 	// Spieler2 wird erstellt und ihm werden zwei Tasten zur Steuerung zugewiesen
 	player2 = createPlayer(game.world.centerX, PLAYER2_POSITION, 'player2', Phaser.Keyboard.A, Phaser.Keyboard.D);
 	// Der Ball wird erstellt und auf den Mittelpunkt gelegt
