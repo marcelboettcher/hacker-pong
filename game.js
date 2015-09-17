@@ -20,6 +20,8 @@ var player1, player2, ball;
 var startKey;
 var player1KeyLeft, player1KeyRight;
 var player2KeyLeft, player2KeyRight;
+var scorePlayer1 = 0;
+var scorePlayer2 = 1;
 
 
 // diese Funktion wird als aller erstes aufgerufen
@@ -43,6 +45,8 @@ function create () {
 	player2 = createPlayer(game.world.centerX, PLAYER2_POSITION, 'player2', Phaser.Keyboard.A, Phaser.Keyboard.D);
 	// Der Ball wird erstellt und auf den Mittelpunkt gelegt
 	ball = createBall(game.world.centerX, game.world.centerY);
+	// Anlegen der Spielstandsanzeige
+	createScores();
 	// Festlegen der Taste zum Spielstart
 	startKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 	startKey.onDown.add(startGame, this);
@@ -85,6 +89,24 @@ function createBall(x, y) {
 	return ball;
 }
 
+// Anlegen der Spielstandanzeige
+function createScores() {
+	// wie soll die Anzeige aussehen?
+	// - 30px ist die Textgröße
+	// - 'fill' ist eine Farbe (red, blue, green, ...)
+	var style = { font: "30px Arial", fill: "red", align: "left" };
+	// Der Spielstand für Spieler1 wird positioniert (x, y)
+    var score1x = 10;
+	var score1y = game.world.height / 2;
+	scorePlayer1 = game.add.text(score1x, score1y, '', style);
+	// Der Spielstand für Spieler2 wird positioniert (x, y)
+	var score2x = game.world.width - 20;
+	var score2y = game.world.height / 2;
+	scorePlayer2 = game.add.text(score2x, score2y, 9, style);
+}
+
+
+
 // diese Funktion wird mehrmals in der Sekunde aufgerufen
 function update () {
 	// hier wird geprüft, ob ein Spieler den Ball getroffen hat
@@ -97,6 +119,20 @@ function update () {
 function goalShotBy(player) {
 	// der Ball wird wieder auf den Mittelpunkt gelegt
 	positionBallAtCenter();
+	// der Spieler, der getroffen hat bekommt einen Punkt
+	addPointTo(player);
+}
+
+// der Spieler, der getroffen hat bekommt einen Punkt
+function addPointTo(player) {
+	// wenn der Spieler der getroffen hat Spieler1 ist,
+	// dann zähle seine Punktestand hoch
+	if(player === player1) {
+		scorePlayer1.text = scorePlayer1.text + '|';
+	} else {
+		// ansonsten hat Spieler2 getroffen und er bekommt einen Punkt dazu
+		scorePlayer2.text = parseInt(scorePlayer2.text) - 1;
+	}
 }
 
 // der Ball wird auf den Mittelpunkt gelegt
