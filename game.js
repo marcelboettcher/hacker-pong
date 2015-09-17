@@ -14,7 +14,7 @@ var PLAYER2_POSITION = 16; // ganz oben
 
 
 // Spiel wird mit Spielfeldgröße erstellt
-var game = new Phaser.Game(FIELD_WIDTH, FIELD_HEIGHT, Phaser.CANVAS, '', { preload: preload, create: create, update: update});
+var game = new Phaser.Game(FIELD_WIDTH, FIELD_HEIGHT, Phaser.CANVAS, 'game', { preload: preload, create: create, update: update});
 // einige Variablen werden definiert, um sie später nutzen zu können
 var player1, player2, ball;
 var startKey;
