@@ -72,3 +72,11 @@ Wenn die Funktion aufgerufen wird, gibt sie die Summe zurück. Diese kann in ein
 ```
 var summe = summiere(1, 2);
 ```
+
+
+### Kommentar
+
+```
+// Das ist ein Kommentar. Der wird nicht ausgeführt.
+var alter = 1;
+```
