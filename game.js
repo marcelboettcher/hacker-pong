@@ -19,6 +19,7 @@ var game = new Phaser.Game(FIELD_WIDTH, FIELD_HEIGHT, Phaser.CANVAS, 'game', { p
 var player1, goal1;
 var player2, goal2;
 var ball;
+var item = [];
 var startKey;
 var player1KeyLeft, player1KeyRight;
 var player2KeyLeft, player2KeyRight;
@@ -33,6 +34,7 @@ function preload () {
 	game.load.image('player2', 'images/player2.png');
 	game.load.image('ball', 'images/ball.png');
 	game.load.image('background', 'images/starfield.png');
+	game.load.image('item', 'images/diamant_red.png');
 }
 
 // diese Funktion wird als zweites aufgerufen und erzeugt das Spiel, die Spieler und den Ball
@@ -57,6 +59,8 @@ function create () {
 	// Festlegen der Taste zum Spielstart
 	startKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 	startKey.onDown.add(startGame, this);
+
+	item = createItem(400, 200, 50, 50);
 }
 
 // Anlegen eines Spielers mit Position, Bild und zwei Tasten zur Steuerung
@@ -106,6 +110,17 @@ function createBall(x, y, width, height) {
 	return ball;
 }
 
+function createItem(x, y, width, height) {
+	var item = game.add.sprite(x, y, 'item');
+	item.width = width;
+	item.height = height;
+	game.physics.enable(item, Phaser.Physics.ARCADE);
+	item.anchor.setTo(0.5, 0.5);
+	item.body.collideWorldBounds = true;
+	item.body.immovable = true;
+	return item;
+}
+
 function createGoal(x, y, width, height) {
 	var goal = game.add.sprite(x, y, 'player1');
 	goal.width = width;
@@ -142,6 +157,13 @@ function update () {
 	// Tor gefallen?
 	game.physics.arcade.collide(goal1, ball, goalShotBy(player2));
 	game.physics.arcade.collide(goal2, ball, goalShotBy(player1));
+
+	game.physics.arcade.collide(item, ball, speedUpBall);
+}
+
+function speedUpBall(item, ball) {
+	ball.body.velocity.x = 2 * ball.body.velocity.x;
+	ball.body.velocity.y = 2 * ball.body.velocity.y;
 }
 
 // wird aufgerufen, wenn ein Spieler ein Tor erzielt hat
