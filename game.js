@@ -42,13 +42,13 @@ function create () {
 	// Spielfeld wird erstellt und die Grafik 'background' als Hintergrund genutzt
 	game.add.tileSprite(0,0,FIELD_WIDTH, FIELD_HEIGHT, 'background');
 	// Spieler1 wird erstellt und ihm werden zwei Tasten zur Steuerung zugewiesen
-	player1 = createPlayer(game.world.centerX, PLAYER1_POSITION, 'player1',
+	player1 = createPlayer(game.world.centerX, PLAYER1_POSITION, 100, 10, 'player1',
 		Phaser.Keyboard.LEFT, Phaser.Keyboard.RIGHT, Phaser.Keyboard.UP, Phaser.Keyboard.DOWN);
 	// Spieler2 wird erstellt und ihm werden zwei Tasten zur Steuerung zugewiesen
-	player2 = createPlayer(game.world.centerX, PLAYER2_POSITION, 'player2',
+	player2 = createPlayer(game.world.centerX, PLAYER2_POSITION, 100, 10, 'player2',
 		Phaser.Keyboard.A, Phaser.Keyboard.D, Phaser.Keyboard.W, Phaser.Keyboard.S);
 	// Der Ball wird erstellt und auf den Mittelpunkt gelegt
-	ball = createBall(game.world.centerX, game.world.centerY);
+	ball = createBall(game.world.centerX, game.world.centerY, 16, 16);
 	// Tore werden erstellt
 	goal1 = createGoal(FIELD_WIDTH / 2, FIELD_HEIGHT - 10, 200, 10);
 	goal2 = createGoal(FIELD_WIDTH / 2, 10, 200, 10);
@@ -60,10 +60,11 @@ function create () {
 }
 
 // Anlegen eines Spielers mit Position, Bild und zwei Tasten zur Steuerung
-function createPlayer(x, y, image, keyLeft, keyRight, keyUp, keyDown) {
+function createPlayer(x, y, width, height, image, keyLeft, keyRight, keyUp, keyDown) {
 	var player = game.add.sprite(x, y, image);
 	// vergrößert/verkleinert den Spieler
-	player.scale.setTo(1, 1);
+	player.width = width;
+	player.height = height;
 	game.physics.enable(player, Phaser.Physics.ARCADE);
 	player.anchor.setTo(0.5, 0.5);
 	player.enableBody = true;
@@ -93,10 +94,10 @@ function createPlayer(x, y, image, keyLeft, keyRight, keyUp, keyDown) {
 }
 
 // Anlegen des Balles an einer gegebenen Position
-function createBall(x, y) {
+function createBall(x, y, width, height) {
 	var ball = game.add.sprite(x, y, 'ball');
-	// vergrößert/verkleinert den Ball
-	ball.scale.setTo(1, 1);
+	ball.width = width;
+	ball.height = height;
 	game.physics.enable(ball, Phaser.Physics.ARCADE);
 	ball.anchor.setTo(0.5, 0.5);
 	ball.body.collideWorldBounds = true;
