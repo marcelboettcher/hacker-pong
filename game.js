@@ -6,11 +6,11 @@ var FIELD_HEIGHT = 640;
 var BALL_SPEED = 300;
 
 // Spieler Geschwindigkeit
-var PLAYER_SPEED = 6;
+var PLAYER_SPEED = 15;
 
 // Spieler Startpositon
 var PLAYER1_POSITION = FIELD_HEIGHT - 16; // ganz unten
-var PLAYER2_POSITION = 16; // ganz oben
+var PLAYER2_POSITION = 10; // ganz oben
 
 
 // Spiel wird mit Spielfeldgröße erstellt
@@ -20,17 +20,18 @@ var player1, player2, ball;
 var startKey;
 var player1KeyLeft, player1KeyRight;
 var player2KeyLeft, player2KeyRight;
-var scorePlayer1 = 0;
+var scorePlayer1 = 1;
 var scorePlayer2 = 1;
 
 
 // diese Funktion wird als aller erstes aufgerufen
 function preload () {
 	// läd die Grafik für spieler1
-	game.load.image('player1', 'images/player1.png');
-	game.load.image('player2', 'images/player2.png');
-	game.load.image('ball', 'images/ball.png');
-	game.load.image('background', 'images/starfield.png');
+	game.load.image('player1', 'images/football_player1.png');
+	game.load.image('player2', 'images/football_player2.png');
+	game.load.image('ball', 'images/football_ball.png');
+	game.load.image('ball99', 'images/football_ball.png');
+	game.load.image('background', 'images/football_field.jpg');
 }
 
 // diese Funktion wird als zweites aufgerufen und erzeugt das Spiel, die Spieler und den Ball
@@ -40,11 +41,19 @@ function create () {
 	// Spielfeld wird erstellt und die Grafik 'background' als Hintergrund genutzt
 	game.add.tileSprite(0,0,FIELD_WIDTH, FIELD_HEIGHT, 'background');
 	// Spieler1 wird erstellt und ihm werden zwei Tasten zur Steuerung zugewiesen
-	// player1 = createPlayer(game.world.centerX, PLAYER1_POSITION, 'player1', Phaser.Keyboard.LEFT, Phaser.Keyboard.RIGHT);
+	player1 = createPlayer(game.world.centerX, PLAYER1_POSITION, 'player1', Phaser.Keyboard.LEFT, Phaser.Keyboard.RIGHT);
 	// Spieler2 wird erstellt und ihm werden zwei Tasten zur Steuerung zugewiesen
 	player2 = createPlayer(game.world.centerX, PLAYER2_POSITION, 'player2', Phaser.Keyboard.A, Phaser.Keyboard.D);
 	// Der Ball wird erstellt und auf den Mittelpunkt gelegt
 	ball = createBall(game.world.centerX, game.world.centerY);
+	ball2 = createBall99(0,0);
+	ball6 = createBall99(0,0);
+	ball7 = createBall99(0,0);
+	ball8 = createBall99(0,0);
+	ball9 = createBall99(0,0);
+	ball3 = createBall99(0,0);
+	ball4 = createBall99(0,0);
+	ball5 = createBall99(0,0);
 	// Anlegen der Spielstandsanzeige
 	createScores();
 	// Festlegen der Taste zum Spielstart
@@ -89,20 +98,32 @@ function createBall(x, y) {
 	return ball;
 }
 
+function createBall99(x, y) {
+	var ball = game.add.sprite(x, y, 'ball99');
+	// vergrößert/verkleinert den Ball
+	ball.scale.setTo(1, 1);
+	game.physics.enable(ball, Phaser.Physics.ARCADE);
+	ball.anchor.setTo(0.5, 0.5);
+	ball.body.collideWorldBounds = true;
+	// wie stark soll der Ball am Spieler und an den Wänden abprallen? x = links/rechts, y = oben/unten
+	ball.body.bounce.setTo(1, 1);
+	return ball;
+}
+
 // Anlegen der Spielstandanzeige
 function createScores() {
 	// wie soll die Anzeige aussehen?
 	// - 30px ist die Textgröße
 	// - 'fill' ist eine Farbe (red, blue, green, ...)
-	var style = { font: "30px Arial", fill: "red", align: "left" };
+	var style = { font: "30px Arial", fill: "black", align: "left" };
 	// Der Spielstand für Spieler1 wird positioniert (x, y)
     var score1x = 10;
 	var score1y = game.world.height / 2;
-	scorePlayer1 = game.add.text(score1x, score1y, '', style);
+	scorePlayer1 = game.add.text(score1x, score1y, 0, style);
 	// Der Spielstand für Spieler2 wird positioniert (x, y)
 	var score2x = game.world.width - 20;
 	var score2y = game.world.height / 2;
-	scorePlayer2 = game.add.text(score2x, score2y, 9, style);
+	scorePlayer2 = game.add.text(score2x, score2y, 0, style);
 }
 
 
@@ -128,10 +149,10 @@ function addPointTo(player) {
 	// wenn der Spieler der getroffen hat Spieler1 ist,
 	// dann zähle seine Punktestand hoch
 	if(player === player1) {
-		scorePlayer1.text = scorePlayer1.text + '|';
+		scorePlayer1.text = parseInt(scorePlayer1.text) + 1;
 	} else {
 		// ansonsten hat Spieler2 getroffen und er bekommt einen Punkt dazu
-		scorePlayer2.text = parseInt(scorePlayer2.text) - 1;
+		scorePlayer2.text = parseInt(scorePlayer2.text) + 1;
 	}
 }
 
@@ -149,6 +170,22 @@ function positionBallAtCenter () {
 function startGame() {
 	ball.body.velocity.x = BALL_SPEED;
 	ball.body.velocity.y = -BALL_SPEED;
+	ball2.body.velocity.y = -BALL_SPEED+100;
+	ball2.body.velocity.x = BALL_SPEED+100;
+	ball6.body.velocity.y = -BALL_SPEED-10;
+	ball6.body.velocity.x = BALL_SPEED-10;
+	ball7.body.velocity.y = -BALL_SPEED+10;
+	ball7.body.velocity.x = BALL_SPEED+10;
+	ball8.body.velocity.y = -BALL_SPEED+20;
+	ball8.body.velocity.x = BALL_SPEED+20;
+	ball9.body.velocity.y = -BALL_SPEED+900;
+	ball9.body.velocity.x = BALL_SPEED+900;
+	ball5.body.velocity.y = -BALL_SPEED+1000;
+	ball5.body.velocity.x = BALL_SPEED+1000;
+	ball4.body.velocity.y = -BALL_SPEED+200;
+	ball4.body.velocity.x = BALL_SPEED+200;
+	ball3.body.velocity.y = -BALL_SPEED+9000;
+	ball3.body.velocity.x = BALL_SPEED+9000;
 }
 
 // hier legen wir fest, was passiert, wenn zwei Objekte aufeinander prallen
