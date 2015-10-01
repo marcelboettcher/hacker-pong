@@ -3,25 +3,27 @@ var FIELD_WIDTH = 480;
 var FIELD_HEIGHT = 640;
 
 // Ball Geschwindigkeit
-var BALL_SPEED = 300;
+var BALL_SPEED = 250;
 
 // Spieler Geschwindigkeit
 var PLAYER_SPEED = 6;
 
 // Spieler Startpositon
 var PLAYER1_POSITION = FIELD_HEIGHT - 16; // ganz unten
-var PLAYER2_POSITION = 16; // ganz oben
+var PLAYER2_POSITION = 40; // ganz oben
 
 
 // Spiel wird mit Spielfeldgröße erstellt
 var game = new Phaser.Game(FIELD_WIDTH, FIELD_HEIGHT, Phaser.CANVAS, 'game', { preload: preload, create: create, update: update});
 // einige Variablen werden definiert, um sie später nutzen zu können
-var player1, player2, ball;
+var player1, goal1;
+var player2, goal2;
+var ball;
 var startKey;
 var player1KeyLeft, player1KeyRight;
 var player2KeyLeft, player2KeyRight;
 var scorePlayer1 = 0;
-var scorePlayer2 = 1;
+var scorePlayer2 = 0;
 
 
 // diese Funktion wird als aller erstes aufgerufen
@@ -40,11 +42,16 @@ function create () {
 	// Spielfeld wird erstellt und die Grafik 'background' als Hintergrund genutzt
 	game.add.tileSprite(0,0,FIELD_WIDTH, FIELD_HEIGHT, 'background');
 	// Spieler1 wird erstellt und ihm werden zwei Tasten zur Steuerung zugewiesen
-	// player1 = createPlayer(game.world.centerX, PLAYER1_POSITION, 'player1', Phaser.Keyboard.LEFT, Phaser.Keyboard.RIGHT);
+	player1 = createPlayer(game.world.centerX, PLAYER1_POSITION, 'player1',
+		Phaser.Keyboard.LEFT, Phaser.Keyboard.RIGHT, Phaser.Keyboard.UP, Phaser.Keyboard.DOWN);
 	// Spieler2 wird erstellt und ihm werden zwei Tasten zur Steuerung zugewiesen
-	player2 = createPlayer(game.world.centerX, PLAYER2_POSITION, 'player2', Phaser.Keyboard.A, Phaser.Keyboard.D);
+	player2 = createPlayer(game.world.centerX, PLAYER2_POSITION, 'player2',
+		Phaser.Keyboard.A, Phaser.Keyboard.D, Phaser.Keyboard.W, Phaser.Keyboard.S);
 	// Der Ball wird erstellt und auf den Mittelpunkt gelegt
 	ball = createBall(game.world.centerX, game.world.centerY);
+	// Tore werden erstellt
+	goal1 = createGoal(FIELD_WIDTH / 2, FIELD_HEIGHT - 10, 200, 10);
+	goal2 = createGoal(FIELD_WIDTH / 2, 10, 200, 10);
 	// Anlegen der Spielstandsanzeige
 	createScores();
 	// Festlegen der Taste zum Spielstart
@@ -53,7 +60,7 @@ function create () {
 }
 
 // Anlegen eines Spielers mit Position, Bild und zwei Tasten zur Steuerung
-function createPlayer(x, y, image, keyLeft, keyRight) {
+function createPlayer(x, y, image, keyLeft, keyRight, keyUp, keyDown) {
 	var player = game.add.sprite(x, y, image);
 	// vergrößert/verkleinert den Spieler
 	player.scale.setTo(1, 1);
@@ -66,11 +73,20 @@ function createPlayer(x, y, image, keyLeft, keyRight) {
 
 	// immer wenn die Taste 'keyLeft' gedrückt wird, wird der Spieler nach links bewegt
 	game.input.keyboard.addKey(keyLeft).onHoldCallback = function() {
-		movePlayer(player, -PLAYER_SPEED);
+		player.x = player.x - PLAYER_SPEED;
 	};
 	// immer wenn die Taste 'keyRight' gedrückt wird, wird der Spieler nach rechts bewegt
 	game.input.keyboard.addKey(keyRight).onHoldCallback = function() {
-		movePlayer(player, PLAYER_SPEED);
+		player.x = player.x + PLAYER_SPEED;
+	};
+
+	// immer wenn die Taste 'keyUp' gedrückt wird, wird der Spieler nach oben bewegt
+	game.input.keyboard.addKey(keyUp).onHoldCallback = function() {
+		player.y = player.y - PLAYER_SPEED;
+	};
+	// immer wenn die Taste 'keyDown' gedrückt wird, wird der Spieler nach unten bewegt
+	game.input.keyboard.addKey(keyDown).onHoldCallback = function() {
+		player.y = player.y + PLAYER_SPEED;
 	};
 
 	return player;
@@ -89,6 +105,17 @@ function createBall(x, y) {
 	return ball;
 }
 
+function createGoal(x, y, width, height) {
+	var goal = game.add.sprite(x, y, 'player1');
+	goal.width = width;
+	goal.height = height;
+	game.physics.enable(goal, Phaser.Physics.ARCADE);
+	goal.anchor.setTo(0.5, 0.5);
+	goal.body.collideWorldBounds = true;
+	goal.body.immovable = true;
+	return goal;
+}
+
 // Anlegen der Spielstandanzeige
 function createScores() {
 	// wie soll die Anzeige aussehen?
@@ -98,29 +125,32 @@ function createScores() {
 	// Der Spielstand für Spieler1 wird positioniert (x, y)
     var score1x = 10;
 	var score1y = game.world.height / 2;
-	scorePlayer1 = game.add.text(score1x, score1y, '', style);
+	scorePlayer1 = game.add.text(score1x, score1y, 0, style);
 	// Der Spielstand für Spieler2 wird positioniert (x, y)
 	var score2x = game.world.width - 20;
 	var score2y = game.world.height / 2;
-	scorePlayer2 = game.add.text(score2x, score2y, 9, style);
+	scorePlayer2 = game.add.text(score2x, score2y, 0, style);
 }
-
-
 
 // diese Funktion wird mehrmals in der Sekunde aufgerufen
 function update () {
-	// hier wird geprüft, ob ein Spieler den Ball getroffen hat
-	checkIfPlayerShootsBall();
-	// hier wird geprüft, ob ein Tor gefallen ist
-	checkIfGoal();
+	// wenn Spieler1 den Ball trifft, wird die Funktion playerShootsBall aufgerufen
+	game.physics.arcade.collide(player1, ball, playerShootsBall);
+	// wenn Spieler2 den Ball trifft, wird die Funktion playerShootsBall aufgerufen
+	game.physics.arcade.collide(player2, ball, playerShootsBall);
+	// Tor gefallen?
+	game.physics.arcade.collide(goal1, ball, goalShotBy(player2));
+	game.physics.arcade.collide(goal2, ball, goalShotBy(player1));
 }
 
 // wird aufgerufen, wenn ein Spieler ein Tor erzielt hat
 function goalShotBy(player) {
-	// der Ball wird wieder auf den Mittelpunkt gelegt
-	positionBallAtCenter();
-	// der Spieler, der getroffen hat bekommt einen Punkt
-	addPointTo(player);
+	return function() {
+		// der Ball wird wieder auf den Mittelpunkt gelegt
+		positionBallAtCenter();
+		// der Spieler, der getroffen hat bekommt einen Punkt
+		addPointTo(player);
+	}
 }
 
 // der Spieler, der getroffen hat bekommt einen Punkt
@@ -128,10 +158,10 @@ function addPointTo(player) {
 	// wenn der Spieler der getroffen hat Spieler1 ist,
 	// dann zähle seine Punktestand hoch
 	if(player === player1) {
-		scorePlayer1.text = scorePlayer1.text + '|';
+		scorePlayer1.text = parseInt(scorePlayer1.text) + 1;
 	} else {
 		// ansonsten hat Spieler2 getroffen und er bekommt einen Punkt dazu
-		scorePlayer2.text = parseInt(scorePlayer2.text) - 1;
+		scorePlayer2.text = parseInt(scorePlayer2.text) + 1;
 	}
 }
 
@@ -151,39 +181,8 @@ function startGame() {
 	ball.body.velocity.y = -BALL_SPEED;
 }
 
-// hier legen wir fest, was passiert, wenn zwei Objekte aufeinander prallen
-function checkIfPlayerShootsBall () {
-	// wenn Spieler1 den Ball trifft, wird die Funktion playerShootsBall aufgerufen
-	game.physics.arcade.collide(player1, ball, playerShootsBall, null, this);
-	// wenn Spieler2 den Ball trifft, wird die Funktion playerShootsBall aufgerufen
-	game.physics.arcade.collide(player2, ball, playerShootsBall, null, this);
-}
-
 // Ein Spieler schießt den Ball zurück
 function playerShootsBall(player, ball) {
 	var diff = ball.x - player.x;
 	ball.body.velocity.x = (10 * diff);
-}
-
-// hier wird geprüft, ob und für wen ein Tor gefallen ist
-// wenn ein Tor gefallen ist, wird die Funktion 'goalShotBy(player)' aufgerufen
-function checkIfGoal () {
-	// hat Speiler 1 (unten) ein Tor erzielt?
-	if (ball.y < ball.height / 2 + 1) {
-		goalShotBy(player1);
-	// hat Speiler 2 (oben) ein Tor erzielt?
-	} else if (ball.y > FIELD_HEIGHT - ball.height / 2 - 1) {
-		goalShotBy(player2);
-	}
-}
-
-// bewege den Spieler um die Anzahl Schritte (steps)
-function movePlayer(player, steps) {
-	var playerHalfWidth = player.width / 2;
-	player.x = player.x + steps;
-	if (player.x < playerHalfWidth) {
-		player.x = playerHalfWidth;
-	} else if (player.x > game.width - playerHalfWidth) {
-		player.x = game.width - playerHalfWidth;
-	}
 }
