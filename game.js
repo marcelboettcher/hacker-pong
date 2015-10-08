@@ -1,231 +1,176 @@
-// Spielfeldgröße
-var FIELD_WIDTH = 480;
-var FIELD_HEIGHT = 640;
+var Jumper = function() {};
+Jumper.Play = function() {};
 
-// Ball Geschwindigkeit
-var BALL_SPEED = 250;
+Jumper.Play.prototype = {
 
-// Spieler Geschwindigkeit
-var PLAYER_SPEED = 6;
+  preload: function() {
+    this.load.image( 'hero', 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/836/dude.png' );
+    this.load.image( 'pixel', 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/836/pixel_1.png' );
+  },
 
-// Spieler Startpositon
-var PLAYER1_POSITION = FIELD_HEIGHT - 40; // ganz unten
-var PLAYER2_POSITION = 40; // ganz oben
+  create: function() {
+    // background color
+    this.stage.backgroundColor = '#6bf';
+
+    // scaling
+    this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+    this.scale.maxWidth = this.game.width;
+    this.scale.maxHeight = this.game.height;
+    this.scale.pageAlignHorizontally = true;
+    this.scale.pageAlignVertically = true;
+
+    // physics
+    this.physics.startSystem( Phaser.Physics.ARCADE );
+
+    // camera and platform tracking vars
+    this.cameraYMin = 99999;
+    this.platformYMin = 99999;
+    this.elementYMin = 99999;
+
+    // create platforms
+    this.platformsCreate();
+
+    // create hero
+    this.heroCreate();
 
 
-// Spiel wird mit Spielfeldgröße erstellt
-var game = new Phaser.Game(FIELD_WIDTH, FIELD_HEIGHT, Phaser.CANVAS, 'game', { preload: preload, create: create, update: update});
-// einige Variablen werden definiert, um sie später nutzen zu können
-var player1, goal1;
-var player2, goal2;
-var ball;
-var items = [];
-var startKey;
-var player1KeyLeft, player1KeyRight;
-var player2KeyLeft, player2KeyRight;
-var scorePlayer1 = 0;
-var scorePlayer2 = 0;
 
+    // cursor controls
+    this.cursor = this.input.keyboard.createCursorKeys();
+  },
+  update: function() {
+    // this is where the main magic happens
+    // the y offset and the height of the world are adjusted
+    // to match the highest point the hero has reached
+    this.world.setBounds( 0, -this.hero.yChange, this.world.width, this.game.height + this.hero.yChange );
 
-// diese Funktion wird als aller erstes aufgerufen
-function preload () {
-	// Grafik für spieler1 wird geladen
-	game.load.image('player1', 'images/football_player1.png');
-	game.load.image('player2', 'images/football_player2.png');
-	game.load.image('ball', 'images/football_ball.png');
-	game.load.image('goal', 'images/goal.png');
-	game.load.image('background', 'images/football_field.jpg');
-	game.load.image('item', 'images/diamant_red.png');
+    // the built in camera follow methods won't work for our needs
+    // this is a custom follow style that will not ever move down, it only moves up
+    this.cameraYMin = Math.min( this.cameraYMin, this.hero.y - this.game.height + 130 );
+    this.camera.y = this.cameraYMin;
+
+    // hero collisions and movement
+    this.physics.arcade.collide( this.hero, this.platforms );
+    this.physics.arcade.collide( this.hero, this.elements, this.fly );
+    this.heroMove();
+
+    // for each plat form, find out which is the highest
+    // if one goes below the camera view, then create a new one at a distance from the highest one
+    // these are pooled so they are very performant
+    this.platforms.forEachAlive( function( elem ) {
+      this.platformYMin = Math.min( this.platformYMin, elem.y );
+      if( elem.y > this.camera.y + this.game.height ) {
+        elem.kill();
+        this.platformsCreateOne( this.rnd.integerInRange( 0, this.world.width - 50 ), this.platformYMin - 100, 50 );
+      }
+    }, this );
+  },
+fly: function(hero, element){
+hero.width += 10;
+hero.height+=10;
+hero.body.velocity.x -= 20;
+},
+  shutdown: function() {
+    // reset everything, or the world will be messed up
+    this.world.setBounds( 0, 0, this.game.width, this.game.height );
+    this.cursor = null;
+    this.hero.destroy();
+    this.hero = null;
+    this.platforms.destroy();
+    this.platforms = null;
+  },
+
+  platformsCreate: function() {
+    // platform basic setup
+    this.platforms = this.add.group();
+    this.platforms.enableBody = true;
+    this.platforms.createMultiple( 10, 'pixel' );
+
+    this.elements = this.add.group();
+    this.elements.enableBody = true;
+    this.elements.createMultiple( 10, 'hero' );
+
+    // create the base platform, with buffer on either side so that the hero doesn't fall through
+    this.platformsCreateOne( -16, this.world.height - 16, this.world.width + 16 );
+    // create a batch of platforms that start to move up the level
+    for( var i = 9; i < 9; i++ ) {
+      this.platformsCreateOne( this.rnd.integerInRange( 0, this.world.width - 50 ), this.world.height - 100 - 100 * i, 50 );
+    }
+  },
+
+createelement: function( x, y, platform ) {
+
+var element = this.elements.getFirstDead();
+  //var element = game.add.sprite( platform.x +16, platform.y - 18 , 'hero' );
+  try {
+    element.reset( x, y );
+    element.anchor.set( 0.5 );
+    element.body.immovable = true;
+  } catch(e) {
+  }
+
+//element.collideWorldBounce=true;
+//this.elements.push(element);
+},
+  platformsCreateOne: function( x, y, width ) {
+    // this is a helper function since writing all of this out can get verbose elsewhere
+    var platform = this.platforms.getFirstDead();
+    platform.reset( x, y );
+    platform.scale.x = width;
+    platform.scale.y = 16;
+    platform.body.immovable = true;
+
+this.createelement(x, y, platform);
+
+    return platform;
+  },
+
+  heroCreate: function() {
+    // basic hero setup
+    this.hero = game.add.sprite( this.world.centerX, this.world.height - 36, 'hero' );
+    this.hero.anchor.set( 0.5 );
+    
+    // track where the hero started and how much the distance has changed from that point
+    this.hero.yOrig = this.hero.y;
+    this.hero.yChange = 0;
+
+    // hero collision setup
+    // disable all collisions except for down
+    this.physics.arcade.enable( this.hero );
+    this.hero.body.gravity.y = 500;
+    this.hero.body.checkCollision.up = false;
+    this.hero.body.checkCollision.left = false;
+    this.hero.body.checkCollision.right = false;
+  },
+
+  heroMove: function() {
+    // handle the left and right movement of the hero
+    if( this.cursor.left.isDown ) {
+      this.hero.body.velocity.x = -200;
+    } else if( this.cursor.right.isDown ) {
+      this.hero.body.velocity.x = 200;
+    } else {
+      this.hero.body.velocity.x = 0;
+    }
+
+    // handle hero jumping
+    if( this.cursor.up.isDown && this.hero.body.touching.down ) {
+      this.hero.body.velocity.y = -350;
+    } 
+    
+    // wrap world coordinated so that you can warp from left to right and right to left
+    this.world.wrap( this.hero, this.hero.width / 2, false );
+
+    // track the maximum amount that the hero has travelled
+    this.hero.yChange = Math.max( this.hero.yChange, Math.abs( this.hero.y - this.hero.yOrig ) );
+    
+    // if the hero falls below the camera view, gameover
+    if( this.hero.y > this.cameraYMin + this.game.height && this.hero.alive ) {
+      this.state.start( 'Play' );
+    }
+  }
 }
 
-// diese Funktion wird als zweites aufgerufen und erzeugt das Spiel, die Spieler und den Ball
-function create () {
-	// Spiel wird erstellt
-	game.physics.startSystem(Phaser.Physics.ARCADE);
-	// Spielfeld wird erstellt und die Grafik 'background' als Hintergrund genutzt
-	game.add.tileSprite(0,0,FIELD_WIDTH, FIELD_HEIGHT, 'background');
-	// Spieler1 wird erstellt und ihm werden zwei Tasten zur Steuerung zugewiesen
-	player1 = createPlayer(game.world.centerX, PLAYER1_POSITION, 78, 37, 'player1',
-		Phaser.Keyboard.LEFT, Phaser.Keyboard.RIGHT, Phaser.Keyboard.UP, Phaser.Keyboard.DOWN);
-	// Spieler2 wird erstellt und ihm werden zwei Tasten zur Steuerung zugewiesen
-	player2 = createPlayer(game.world.centerX, PLAYER2_POSITION, 78, 37, 'player2',
-		Phaser.Keyboard.A, Phaser.Keyboard.D, Phaser.Keyboard.W, Phaser.Keyboard.S);
-	// Der Ball wird erstellt und auf den Mittelpunkt gelegt
-	ball = createBall(game.world.centerX, game.world.centerY, 16, 16);
-	// Tore werden erstellt
-	goal1 = createGoal(FIELD_WIDTH / 2, FIELD_HEIGHT - 15, 150, 10);
-	goal2 = createGoal(FIELD_WIDTH / 2, 10, 150, 10);
-	// Anlegen der Spielstandsanzeige
-	createScores();
-	// Festlegen der Taste zum Spielstart
-	startKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-	startKey.onDown.add(startGame, this);
-
-	//hier wird ein Gegenstand erzeugt
-	//createItem();
-}
-
-// Anlegen eines Spielers mit Position, Bild und zwei Tasten zur Steuerung
-function createPlayer(x, y, width, height, image, keyLeft, keyRight, keyUp, keyDown) {
-	var player = game.add.sprite(x, y, image);
-	// vergrößert/verkleinert den Spieler
-	player.width = width;
-	player.height = height;
-	game.physics.enable(player, Phaser.Physics.ARCADE);
-	player.anchor.setTo(0.5, 0.5);
-	player.enableBody = true;
-	player.body.collideWorldBounds = true;
-	player.body.bounce.setTo(1, 1);
-	player.body.immovable = true;
-
-	// immer wenn die Taste 'keyLeft' gedrückt wird, wird der Spieler nach links bewegt
-	game.input.keyboard.addKey(keyLeft).onHoldCallback = function() {
-		player.x = player.x - PLAYER_SPEED;
-	};
-	// immer wenn die Taste 'keyRight' gedrückt wird, wird der Spieler nach rechts bewegt
-	game.input.keyboard.addKey(keyRight).onHoldCallback = function() {
-		player.x = player.x + PLAYER_SPEED;
-	};
-
-	// immer wenn die Taste 'keyUp' gedrückt wird, wird der Spieler nach oben bewegt
-	game.input.keyboard.addKey(keyUp).onHoldCallback = function() {
-		player.y = player.y - PLAYER_SPEED;
-	};
-	// immer wenn die Taste 'keyDown' gedrückt wird, wird der Spieler nach unten bewegt
-	game.input.keyboard.addKey(keyDown).onHoldCallback = function() {
-		player.y = player.y + PLAYER_SPEED;
-	};
-
-	return player;
-}
-
-// Anlegen des Balles an einer gegebenen Position
-function createBall(x, y, width, height) {
-	var ball = game.add.sprite(x, y, 'ball');
-	ball.width = width;
-	ball.height = height;
-	game.physics.enable(ball, Phaser.Physics.ARCADE);
-	ball.anchor.setTo(0.5, 0.5);
-	ball.body.collideWorldBounds = true;
-	// wie stark soll der Ball am Spieler und an den Wänden abprallen? x = links/rechts, y = oben/unten
-	ball.body.bounce.setTo(1, 1);
-	return ball;
-}
-
-function createItem() {
-	var itemX = Math.random() * FIELD_WIDTH;
-	var itemY = Math.random() * FIELD_HEIGHT;
-	var item = game.add.sprite(itemX, itemY, 'item');
-	var minSize = 30;
-	item.width = Math.random() * 100 + minSize;
-	item.height = Math.random() * 100 + minSize;
-	game.physics.enable(item, Phaser.Physics.ARCADE);
-	item.anchor.setTo(0.5, 0.5);
-	item.body.collideWorldBounds = true;
-	item.body.immovable = true;
-	items.push(item);
-	return item;
-}
-
-function createGoal(x, y, width, height) {
-	var goal = game.add.sprite(x, y, 'goal');
-	goal.width = width;
-	goal.height = height;
-	game.physics.enable(goal, Phaser.Physics.ARCADE);
-	goal.anchor.setTo(0.5, 0.5);
-	goal.body.collideWorldBounds = true;
-	goal.body.immovable = true;
-	return goal;
-}
-
-// Anlegen der Spielstandanzeige
-function createScores() {
-	// wie soll die Anzeige aussehen?
-	// - 30px ist die Textgröße
-	// - 'fill' ist eine Farbe (red, blue, green, ...)
-	var style = { font: "30px Arial", fill: "red", align: "left" };
-	// Der Spielstand für Spieler1 wird positioniert (x, y)
-    var score1x = 15;
-	var score1y = game.world.height / 2;
-	scorePlayer1 = game.add.text(score1x, score1y, 0, style);
-	// Der Spielstand für Spieler2 wird positioniert (x, y)
-	var score2x = game.world.width - 30;
-	var score2y = game.world.height / 2;
-	scorePlayer2 = game.add.text(score2x, score2y, 0, style);
-}
-
-// diese Funktion wird mehrmals in der Sekunde aufgerufen
-function update () {
-	// wenn Spieler1 den Ball trifft, wird die Funktion playerShootsBall aufgerufen
-	game.physics.arcade.collide(player1, ball, playerShootsBall);
-	// wenn Spieler2 den Ball trifft, wird die Funktion playerShootsBall aufgerufen
-	game.physics.arcade.collide(player2, ball, playerShootsBall);
-	// Tor gefallen?
-	game.physics.arcade.collide(goal1, ball, goalShotBy(player2));
-	game.physics.arcade.collide(goal2, ball, goalShotBy(player1));
-
-	game.physics.arcade.collide(items, ball, hitItem);
-}
-
-function hitItem(item, ball) {
-	var actions = [speedUpBall, growBall];
-	var random = Math.floor(Math.random() * actions.length);
-	var action = actions[random];
-	action();
-	item.kill();
-	createItem();
-}
-
-function speedUpBall() {
-	ball.body.velocity.x = 2 * ball.body.velocity.x;
-	ball.body.velocity.y = 2 * ball.body.velocity.y;
-}
-
-function growBall() {
-	// hier müsst ihr programmieren, dass der Ball größer wird (width und height)
-}
-
-
-// wird aufgerufen, wenn ein Spieler ein Tor erzielt hat
-function goalShotBy(player) {
-	return function() {
-		// der Ball wird wieder auf den Mittelpunkt gelegt
-		positionBallAtCenter();
-		// der Spieler, der getroffen hat bekommt einen Punkt
-		addPointTo(player);
-	}
-}
-
-// der Spieler, der getroffen hat bekommt einen Punkt
-function addPointTo(player) {
-	// wenn der Spieler der getroffen hat Spieler1 ist,
-	// dann zähle seine Punktestand hoch
-	if(player === player1) {
-		scorePlayer1.text = parseInt(scorePlayer1.text) + 1;
-	} else {
-		// ansonsten hat Spieler2 getroffen und er bekommt einen Punkt dazu
-		scorePlayer2.text = parseInt(scorePlayer2.text) + 1;
-	}
-}
-
-// der Ball wird auf den Mittelpunkt gelegt
-function positionBallAtCenter () {
-	// die Position des Balles wird gesetzt
-	ball.x = game.world.centerX;
-	ball.y = game.world.centerY;
-	// der Ball soll sich nicht bewegen
-	ball.body.velocity.x = 0;
-	ball.body.velocity.y = 0;
-}
-
-// startet das Spiel indem der Ball nach rechts oben geschossen wird
-function startGame() {
-	ball.body.velocity.x = BALL_SPEED;
-	ball.body.velocity.y = -BALL_SPEED;
-}
-
-// Ein Spieler schießt den Ball zurück
-function playerShootsBall(player, ball) {
-	var diff = ball.x - player.x;
-	ball.body.velocity.x = (10 * diff);
-}
+var game = new Phaser.Game( 300, 500, Phaser.CANVAS, '' );
+game.state.add( 'Play', Jumper.Play );
+game.state.start( 'Play' );
