@@ -61,7 +61,8 @@ function create () {
 	startKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 	startKey.onDown.add(startGame, this);
 
-	createItem();
+	//hier wird ein Gegenstand erzeugt
+	//createItem();
 }
 
 // Anlegen eines Spielers mit Position, Bild und zwei Tasten zur Steuerung
@@ -167,7 +168,7 @@ function update () {
 }
 
 function hitItem(item, ball) {
-	var actions = [speedUpBall, growBall, growPlayer1];
+	var actions = [speedUpBall, growBall];
 	var random = Math.floor(Math.random() * actions.length);
 	var action = actions[random];
 	action();
@@ -181,14 +182,9 @@ function speedUpBall() {
 }
 
 function growBall() {
-	ball.width = ball.width + 5;
-	ball.height = ball.height + 5;
+	// hier müsst ihr programmieren, dass der Ball größer wird (width und height)
 }
 
-function growPlayer1() {
-	player1.width = player1.width + 15;
-	player1.height = player1.height + 15;
-}
 
 // wird aufgerufen, wenn ein Spieler ein Tor erzielt hat
 function goalShotBy(player) {
