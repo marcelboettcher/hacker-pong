@@ -1,13 +1,19 @@
 // Spielfeldgröße
-var FIELD_WIDTH = 480;
-var FIELD_HEIGHT = 640;
+var FIELD_WIDTH = 640;
+var FIELD_HEIGHT = 480;
 
 // Ball Geschwindigkeit
 var BALL_SPEED = 250;
 
+var Ball_WIDTH = 20;
+
+var BALL_HEIGHT = 20;
 // Spieler Geschwindigkeit
 var PLAYER_SPEED = 6;
 
+var PLAYER_WIDTH = 50;
+
+var PLAYER_HEIGHT = 15;
 // Spieler Startpositon
 var PLAYER1_POSITION = FIELD_HEIGHT - 40; // ganz unten
 var PLAYER2_POSITION = 40; // ganz oben
@@ -30,12 +36,12 @@ var scorePlayer2 = 0;
 // diese Funktion wird als aller erstes aufgerufen
 function preload () {
 	// Grafik für spieler1 wird geladen
-	game.load.image('player1', 'images/football_player1.png');
-	game.load.image('player2', 'images/football_player2.png');
-	game.load.image('ball', 'images/football_ball.png');
-	game.load.image('goal', 'images/goal.png');
-	game.load.image('background', 'images/football_field.jpg');
-	game.load.image('item', 'images/diamant_red.png');
+	game.load.image('player1', 'images/player_red.png');
+	game.load.image('player2', 'images/player_green.png');
+	game.load.image('ball', 'images/ball.png');
+	game.load.image('goal', 'images/player1.png');
+	game.load.image('background', 'images/starfield.png');
+	game.load.image('item', 'images/diamant_blue.png');
 }
 
 // diese Funktion wird als zweites aufgerufen und erzeugt das Spiel, die Spieler und den Ball
@@ -62,15 +68,15 @@ function create () {
 	startKey.onDown.add(startGame, this);
 
 	//hier wird ein Gegenstand erzeugt
-	//createItem();
+	createItem();
 }
 
 // Anlegen eines Spielers mit Position, Bild und zwei Tasten zur Steuerung
 function createPlayer(x, y, width, height, image, keyLeft, keyRight, keyUp, keyDown) {
 	var player = game.add.sprite(x, y, image);
 	// vergrößert/verkleinert den Spieler
-	player.width = width;
-	player.height = height;
+	player.width = PLAYER_WIDTH;
+	player.height = PLAYER_HEIGHT;
 	game.physics.enable(player, Phaser.Physics.ARCADE);
 	player.anchor.setTo(0.5, 0.5);
 	player.enableBody = true;
@@ -102,8 +108,8 @@ function createPlayer(x, y, width, height, image, keyLeft, keyRight, keyUp, keyD
 // Anlegen des Balles an einer gegebenen Position
 function createBall(x, y, width, height) {
 	var ball = game.add.sprite(x, y, 'ball');
-	ball.width = width;
-	ball.height = height;
+	ball.width = Ball_WIDTH;
+	ball.height = BALL_HEIGHT;
 	game.physics.enable(ball, Phaser.Physics.ARCADE);
 	ball.anchor.setTo(0.5, 0.5);
 	ball.body.collideWorldBounds = true;
@@ -168,7 +174,7 @@ function update () {
 }
 
 function hitItem(item, ball) {
-	var actions = [speedUpBall, growBall];
+	var actions = [ speedUpBall, growPlayer1, growBall, growPlayer2 ];
 	var random = Math.floor(Math.random() * actions.length);
 	var action = actions[random];
 	action();
@@ -183,8 +189,20 @@ function speedUpBall() {
 
 function growBall() {
 	// hier müsst ihr programmieren, dass der Ball größer wird (width und height)
+   ball.width = 5 + ball.width;
+   ball.height = 5 + ball.width;
 }
 
+function growPlayer2() {
+
+	player2.width = 60 + player2.width;
+	player2.height = 10 + player2.height;
+}
+
+function growPlayer1() {
+	 player1.width = 60 + player1.width; 
+	 player1.height = 10 + player1.height;
+}
 
 // wird aufgerufen, wenn ein Spieler ein Tor erzielt hat
 function goalShotBy(player) {
