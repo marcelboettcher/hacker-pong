@@ -25,7 +25,7 @@ var player1KeyLeft, player1KeyRight;
 var player2KeyLeft, player2KeyRight;
 var scorePlayer1 = 0;
 var scorePlayer2 = 0;
-
+var lastPlayer;
 
 // diese Funktion wird als aller erstes aufgerufen
 function preload () {
@@ -164,14 +164,25 @@ function update () {
 	game.physics.arcade.collide(goal2, ball, goalShotBy(player1));
 
 	game.physics.arcade.collide(items, ball, hitItem);
+
+	player1.x = ball.x;
+	player2.x = ball.x;
+}
+
+function shrinkLastPlayer() {
+	if(lastPlayer) lastPlayer.width = lastPlayer.width - 15;
 }
 
 function hitItem(item, ball) {
-	var actions = [speedUpBall, growBall, growPlayer1];
+	var actions = [speedUpBall, growBall, shrinkLastPlayer, createAnotherItem];
 	var random = Math.floor(Math.random() * actions.length);
 	var action = actions[random];
 	action();
 	item.kill();
+	createItem();
+}
+
+function createAnotherItem() {
 	createItem();
 }
 
@@ -230,6 +241,7 @@ function startGame() {
 
 // Ein Spieler schießt den Ball zurück
 function playerShootsBall(player, ball) {
-	var diff = ball.x - player.x;
+	lastPlayer = player;
+	var diff = ball.x - player.x + Math.random() * 20;
 	ball.body.velocity.x = (10 * diff);
 }
