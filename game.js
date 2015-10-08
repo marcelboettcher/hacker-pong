@@ -26,6 +26,10 @@ var player2KeyLeft, player2KeyRight;
 var scorePlayer1 = 0;
 var scorePlayer2 = 0;
 
+//var ball_height = 16
+//var ball_height = 16
+//var player_height = player.height
+//var player_width = player.width
 
 // diese Funktion wird als aller erstes aufgerufen
 function preload () {
@@ -33,6 +37,7 @@ function preload () {
 	game.load.image('player1', 'images/football_player1.png');
 	game.load.image('player2', 'images/football_player2.png');
 	game.load.image('ball', 'images/football_ball.png');
+	game.load.image('ball_troll', 'images/football_ball_troll.png');
 	game.load.image('goal', 'images/goal.png');
 	game.load.image('background', 'images/football_field.jpg');
 	game.load.image('item', 'images/diamant_red.png');
@@ -45,7 +50,7 @@ function create () {
 	// Spielfeld wird erstellt und die Grafik 'background' als Hintergrund genutzt
 	game.add.tileSprite(0,0,FIELD_WIDTH, FIELD_HEIGHT, 'background');
 	// Spieler1 wird erstellt und ihm werden zwei Tasten zur Steuerung zugewiesen
-	player1 = createPlayer(game.world.centerX, PLAYER1_POSITION, 78, 37, 'player1',
+	player1 = createPlayer(game.world.centerX, PLAYER1_POSITION, 78, 37 , 'player1',
 		Phaser.Keyboard.LEFT, Phaser.Keyboard.RIGHT, Phaser.Keyboard.UP, Phaser.Keyboard.DOWN);
 	// Spieler2 wird erstellt und ihm werden zwei Tasten zur Steuerung zugewiesen
 	player2 = createPlayer(game.world.centerX, PLAYER2_POSITION, 78, 37, 'player2',
@@ -62,7 +67,7 @@ function create () {
 	startKey.onDown.add(startGame, this);
 
 	//hier wird ein Gegenstand erzeugt
-	//createItem();
+	createItem();
 }
 
 // Anlegen eines Spielers mit Position, Bild und zwei Tasten zur Steuerung
@@ -96,6 +101,7 @@ function createPlayer(x, y, width, height, image, keyLeft, keyRight, keyUp, keyD
 		player.y = player.y + PLAYER_SPEED;
 	};
 
+	player.pc = false;
 	return player;
 }
 
@@ -165,10 +171,19 @@ function update () {
 	game.physics.arcade.collide(goal2, ball, goalShotBy(player1));
 
 	game.physics.arcade.collide(items, ball, hitItem);
+	if(player1.pc === true){
+		player1.x = ball.x;
+	}
+
+	if(player2.pc === true){
+		player2.x = ball.x;
+	}
+
 }
 
 function hitItem(item, ball) {
-	var actions = [speedUpBall, growBall];
+	var actions = [growPlayer1, growPlayer2,troll,speedUpBall, cheatlayer1, cheatlayer2];
+	//var actions = [speedUpBall, cheatlayer1, cheatlayer2, troll];
 	var random = Math.floor(Math.random() * actions.length);
 	var action = actions[random];
 	action();
@@ -178,12 +193,77 @@ function hitItem(item, ball) {
 
 function speedUpBall() {
 	ball.body.velocity.x = 2 * ball.body.velocity.x;
-	ball.body.velocity.y = 2 * ball.body.velocity.y;
+	ball.body.velocity.y = 2  * ball.body.velocity.y;
 }
 
-function growBall() {
+function growPlayer1 () {
+player1.width = player1.width + player1.width
+player1.height = player1.height + player1.height
+	setTimeout(function() {
+		player1.width = player1.width / 2
+		player1.height = player1.height / 2
+	}, 5000);// hier müsst ihr programmieren, dass der Ball größer wird (width und height)
+}
+
+function growPlayer2 () {
+player2.width = player2.width + player2.width
+player2.height = player2.height + player2.height
+setTimeout(function() {
+		player2.width = player2.width / 2
+		player2.height = player2.height / 2
+	}, 5000);
 	// hier müsst ihr programmieren, dass der Ball größer wird (width und height)
 }
+
+/*function smallerPlayer1(){
+
+player1.width = player1.width / 2
+player1.height = player1.height / 2
+
+}
+
+function smallerPlayer2(){
+
+player2.width = player2.width / 2
+player2.height = player2.height / 2
+
+}
+*/
+
+function growBall() {
+	ball.height = ball.height + ball.height
+	ball.width = ball.width + ball.width
+	// hier müsst ihr programmieren, dass der Ball größer wird (width und height)
+}
+
+function cheatlayer1() {
+	player1.pc = true
+	setTimeout(function() {
+		player1.pc = false;
+	}, 5000);
+}
+
+function troll() {
+	ball.loadTexture('ball_troll');
+	ball.height =32
+	ball.width = 32
+	setTimeout(function() {
+		ball.loadTexture('ball');
+		ball.height =16
+		ball.width =16
+	}, 5000);
+	
+}
+
+
+function cheatlayer2(){
+
+player2.pc = true
+setTimeout(function() {
+		player2.pc = false;
+	}, 5000);
+}
+
 
 
 // wird aufgerufen, wenn ein Spieler ein Tor erzielt hat
