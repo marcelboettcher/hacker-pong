@@ -5,13 +5,18 @@ var FIELD_HEIGHT = 640;
 // Ball Geschwindigkeit
 var BALL_SPEED = 250;
 
+var BALLegg_HEIGHT = 4
+var BALLegg_HEIGHT = 6
+
+var BALL_HEIGHT = 100
+var BALL_WIDTH = 100
+
 // Spieler Geschwindigkeit
 var PLAYER_SPEED = 6;
 
 // Spieler Startpositon
 var PLAYER1_POSITION = FIELD_HEIGHT - 40; // ganz unten
 var PLAYER2_POSITION = 40; // ganz oben
-
 
 // Spiel wird mit Spielfeldgröße erstellt
 var game = new Phaser.Game(FIELD_WIDTH, FIELD_HEIGHT, Phaser.CANVAS, 'game', { preload: preload, create: create, update: update});
@@ -61,6 +66,7 @@ function create () {
 	startKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 	startKey.onDown.add(startGame, this);
 
+	createItem();
 	//hier wird ein Gegenstand erzeugt
 	//createItem();
 }
@@ -122,7 +128,8 @@ function createItem() {
 	game.physics.enable(item, Phaser.Physics.ARCADE);
 	item.anchor.setTo(0.5, 0.5);
 	item.body.collideWorldBounds = true;
-	item.body.immovable = true;
+	item.body.immovable = false;
+	item.body.velocity.y = 200;
 	items.push(item);
 	return item;
 }
@@ -165,10 +172,22 @@ function update () {
 	game.physics.arcade.collide(goal2, ball, goalShotBy(player1));
 
 	game.physics.arcade.collide(items, ball, hitItem);
+	game.physics.arcade.collide(player1, items, hitPlayer);
+	game.physics.arcade.collide(player2, items, hitPlayer);
 }
-
+function hitPlayer(player, item) {
+	//if(player === player2) {
+		growPlayer2();
+	//if(player === player1) {
+		growPlayer1();
+//	}
+	item.kill();
+	createItem();
+} 
 function hitItem(item, ball) {
-	var actions = [speedUpBall, growBall];
+	
+	var actions = [speedUpBall, growBall, shrinkBall,growPlayer1,shrinkPlayer1,growPlayer2,shrinkPlayer2,eggBall,reeggBall];
+	//var actions = [];
 	var random = Math.floor(Math.random() * actions.length);
 	var action = actions[random];
 	action();
@@ -182,10 +201,35 @@ function speedUpBall() {
 }
 
 function growBall() {
-	// hier müsst ihr programmieren, dass der Ball größer wird (width und height)
+	ball.width = ball.width + 10;
+	ball.height = ball.height + 10;
 }
-
-
+function shrinkBall() {
+	ball.width = ball.width - 10;
+	ball.height = ball.height - 10;
+}
+function shrinkPlayer1() {
+	player1.width = player1.width - 10;
+	player1.height = player1.height - 10;
+}
+function growPlayer1() {
+	player1.width = player1.width + 10;
+	player1.height = player1.height + 10;
+}
+function shrinkPlayer2() {
+	player2.width = player2.width - 10;
+	player2.height = player2.height - 10;
+}
+function growPlayer2(){
+	player2.width = player2.width + 10;
+	player2.height = player2.height + 10;
+}
+function eggBall(){
+	ball.height = ball.height + 5;
+}
+function reeggBall(){
+	ball.height = ball.height - 5;
+}
 // wird aufgerufen, wenn ein Spieler ein Tor erzielt hat
 function goalShotBy(player) {
 	return function() {
