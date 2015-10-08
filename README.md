@@ -8,18 +8,23 @@
 Team 1
 - Session 2: https://rawgit.com/marcelboettcher/hacker-pong/team1_session2/index.html
 - Session 3: https://rawgit.com/marcelboettcher/hacker-pong/team1_session3/index.html
+
 Team 2
 - Session 2: https://rawgit.com/marcelboettcher/hacker-pong/team2_session2/index.html
 - Session 3: https://rawgit.com/marcelboettcher/hacker-pong/team2_session3/index.html
+
 Team 3
 - Session 2: https://rawgit.com/marcelboettcher/hacker-pong/team3_session2/index.html
 - Session 3: https://rawgit.com/marcelboettcher/hacker-pong/team3_session3/index.html
+
 Team 4
 - Session 2: https://rawgit.com/marcelboettcher/hacker-pong/team4_session2/index.html
 - Session 3: https://rawgit.com/marcelboettcher/hacker-pong/team4_session3/index.html
+
 Team 5
 - Session 2: https://rawgit.com/marcelboettcher/hacker-pong/team5_session2/index.html
 - Session 3: https://rawgit.com/marcelboettcher/hacker-pong/team5_session3/index.html
+
 
 ## Grundlagen	von JavaScript
 
