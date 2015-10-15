@@ -23,8 +23,8 @@ var items = [];
 var startKey;
 var player1KeyLeft, player1KeyRight;
 var player2KeyLeft, player2KeyRight;
-var scorePlayer1 = 0;
-var scorePlayer2 = 0;
+var scorePlayer1 = 10;
+var scorePlayer2 = 10;
 
 
 // diese Funktion wird als aller erstes aufgerufen
@@ -33,9 +33,10 @@ function preload () {
 	game.load.image('player1', 'images/football_player1.png');
 	game.load.image('player2', 'images/football_player2.png');
 	game.load.image('ball', 'images/football_ball.png');
-	game.load.image('goal', 'images/goal.png');
-	game.load.image('background', 'images/football_field.jpg');
-	game.load.image('item', 'images/diamant_red.png');
+	game.load.image('goal', 'images/brick.png');
+	game.load.image('background', 'images/Chaos_Void.jpg');
+	game.load.image('item1', 'images/Diamant.png');
+	game.load.image('item2', 'images/diamond_pickaxe.png');
 }
 
 // diese Funktion wird als zweites aufgerufen und erzeugt das Spiel, die Spieler und den Ball
@@ -61,8 +62,9 @@ function create () {
 	startKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 	startKey.onDown.add(startGame, this);
 
-	//hier wird ein Gegenstand erzeugt
-	//createItem();
+	//hier wird ein Gegenstand erzeug
+	createItem('item1');
+	createItem('item2');
 }
 
 // Anlegen eines Spielers mit Position, Bild und zwei Tasten zur Steuerung
@@ -112,10 +114,10 @@ function createBall(x, y, width, height) {
 	return ball;
 }
 
-function createItem() {
+function createItem(image) {	
 	var itemX = Math.random() * FIELD_WIDTH;
 	var itemY = Math.random() * FIELD_HEIGHT;
-	var item = game.add.sprite(itemX, itemY, 'item');
+	var item = game.add.sprite(itemX, itemY, image);
 	var minSize = 30;
 	item.width = Math.random() * 100 + minSize;
 	item.height = Math.random() * 100 + minSize;
@@ -126,6 +128,7 @@ function createItem() {
 	items.push(item);
 	return item;
 }
+
 
 function createGoal(x, y, width, height) {
 	var goal = game.add.sprite(x, y, 'goal');
@@ -165,10 +168,13 @@ function update () {
 	game.physics.arcade.collide(goal2, ball, goalShotBy(player1));
 
 	game.physics.arcade.collide(items, ball, hitItem);
+
+	player2.x = ball.x + Math.random() * 150;
 }
 
 function hitItem(item, ball) {
-	var actions = [speedUpBall, growBall];
+	var actions = [speedUpBall, growBall, shrinkBall, growPlayer1, growPlayer2];
+	//var actions = [shrinkBall];
 	var random = Math.floor(Math.random() * actions.length);
 	var action = actions[random];
 	action();
@@ -177,14 +183,32 @@ function hitItem(item, ball) {
 }
 
 function speedUpBall() {
-	ball.body.velocity.x = 2 * ball.body.velocity.x;
-	ball.body.velocity.y = 2 * ball.body.velocity.y;
+	ball.body.velocity.x = 3 * ball.body.velocity.x;
+	ball.body.velocity.y = 3 * ball.body.velocity.y;
 }
 
 function growBall() {
+	ball.width = 10 + ball.width;
+	ball.height = 10 + ball.height;
 	// hier müsst ihr programmieren, dass der Ball größer wird (width und height)
 }
+function growPlayer1() {
+	player1.width = ball.width * 2;
+	player1.height = ball.height * 2;
+}
 
+function growPlayer2() {
+	player2.width = ball.width + 7;
+	player2.height = ball.height + 5;
+
+
+}
+
+function shrinkBall() {
+	ball.width = ball.width - 7;
+	ball.height = ball.height - 7;
+	// hier müsst ihr programmieren, dass der Ball größer wird (width und height)
+}
 
 // wird aufgerufen, wenn ein Spieler ein Tor erzielt hat
 function goalShotBy(player) {
@@ -193,6 +217,8 @@ function goalShotBy(player) {
 		positionBallAtCenter();
 		// der Spieler, der getroffen hat bekommt einen Punkt
 		addPointTo(player);
+		startGame();
+     
 	}
 }
 
@@ -222,6 +248,10 @@ function positionBallAtCenter () {
 function startGame() {
 	ball.body.velocity.x = BALL_SPEED;
 	ball.body.velocity.y = -BALL_SPEED;
+	player1.x = game.world.centerX;
+	player1.y = 640;
+    player2.x = game.world.centerX;
+    player2.y = 0;
 }
 
 // Ein Spieler schießt den Ball zurück
@@ -229,3 +259,7 @@ function playerShootsBall(player, ball) {
 	var diff = ball.x - player.x;
 	ball.body.velocity.x = (10 * diff);
 }
+
+
+
+
