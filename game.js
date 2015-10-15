@@ -26,6 +26,7 @@ var player1, goal1;
 var player2, goal2;
 var ball;
 var items = [];
+var diamants = [];
 var startKey;
 var player1KeyLeft, player1KeyRight;
 var player2KeyLeft, player2KeyRight;
@@ -42,6 +43,7 @@ function preload () {
 	game.load.image('goal', 'images/player1.png');
 	game.load.image('background', 'images/starfield.png');
 	game.load.image('item', 'images/diamant_blue.png');
+	game.load.image('diamant', 'images/diamant_yellow.png');
 }
 
 // diese Funktion wird als zweites aufgerufen und erzeugt das Spiel, die Spieler und den Ball
@@ -123,14 +125,33 @@ function createItem() {
 	var itemY = Math.random() * FIELD_HEIGHT;
 	var item = game.add.sprite(itemX, itemY, 'item');
 	var minSize = 30;
-	item.width = Math.random() * 100 + minSize;
-	item.height = Math.random() * 100 + minSize;
+	item.width = 40;
+	item.height = 60;
 	game.physics.enable(item, Phaser.Physics.ARCADE);
 	item.anchor.setTo(0.5, 0.5);
 	item.body.collideWorldBounds = true;
-	item.body.immovable = true;
+	item.body.velocity.x = 100;
+	item.body.bounce.setTo(1, 1);
+	item.immovable = true;
 	items.push(item);
 	return item;
+}
+
+function createDiamant() {
+	var diamantX = Math.random() * FIELD_WIDTH;
+	var diamantY = Math.random() * FIELD_HEIGHT;
+	var diamant = game.add.sprite(diamantX, diamantY, 'diamant');
+	var minSize = 30;
+	diamant.width = 40;
+	diamant.height = 60;
+	game.physics.enable(diamant, Phaser.Physics.ARCADE);
+	diamant.anchor.setTo(0.5, 0.5);
+	diamant.body.collideWorldBounds = true;
+	diamant.body.velocity.x = 100;
+	diamant.body.bounce.setTo(1, 1);
+	diamant.immovable = true;
+	diamants.push(diamant);
+	return diamant;
 }
 
 function createGoal(x, y, width, height) {
@@ -149,7 +170,7 @@ function createScores() {
 	// wie soll die Anzeige aussehen?
 	// - 30px ist die Textgröße
 	// - 'fill' ist eine Farbe (red, blue, green, ...)
-	var style = { font: "30px Arial", fill: "red", align: "left" };
+	var style = { font: "30px Arial", fill: "blue", align: "left" };
 	// Der Spielstand für Spieler1 wird positioniert (x, y)
     var score1x = 15;
 	var score1y = game.world.height / 2;
@@ -171,10 +192,13 @@ function update () {
 	game.physics.arcade.collide(goal2, ball, goalShotBy(player1));
 
 	game.physics.arcade.collide(items, ball, hitItem);
+
+	game.physics.arcade.collide(player1, diamants, addPoint);
+	game.physics.arcade.collide(player2, diamants, addPoint);
 }
 
 function hitItem(item, ball) {
-	var actions = [ speedUpBall, growPlayer1, growBall, growPlayer2 ];
+	var actions = [ speedUpBall, growPlayer1, growBall, growPlayer2, addDiamants];
 	var random = Math.floor(Math.random() * actions.length);
 	var action = actions[random];
 	action();
@@ -187,6 +211,10 @@ function speedUpBall() {
 	ball.body.velocity.y = 2 * ball.body.velocity.y;
 }
 
+function addPoint(player, item) {
+	addPointTo(player);
+}
+
 function growBall() {
 	// hier müsst ihr programmieren, dass der Ball größer wird (width und height)
    ball.width = 5 + ball.width;
@@ -194,14 +222,35 @@ function growBall() {
 }
 
 function growPlayer2() {
-
 	player2.width = 60 + player2.width;
 	player2.height = 10 + player2.height;
+	setTimeout(function() {
+	player2.width = player2.width - 60;
+	plyer2.height = player2.width - 10;	
+	}, 8000);
 }
 
 function growPlayer1() {
 	 player1.width = 60 + player1.width; 
 	 player1.height = 10 + player1.height;
+	 setTimeout(function() {
+	 player1.width = player1.width - 60;
+	 player1.height = player1.height - 10;
+
+	 }, 8000);
+}
+
+function addDiamants() {
+	createDiamant();
+	createDiamant();
+	createDiamant();
+	createDiamant();
+	createDiamant();
+	setTimeout(function() {
+		for(var i=0; i < diamants.length; i++) {
+			diamants[i].kill();
+		}	
+	}, 11000);
 }
 
 // wird aufgerufen, wenn ein Spieler ein Tor erzielt hat
