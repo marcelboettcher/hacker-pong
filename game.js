@@ -31,6 +31,8 @@ var player2KeyLeft, player2KeyRight;
 var scorePlayer1 = 0;
 var scorePlayer2 = 0;
 
+var bumm;
+
 
 // diese Funktion wird als aller erstes aufgerufen
 function preload () {
@@ -41,10 +43,13 @@ function preload () {
 	game.load.image('goal', 'images/goal.png');
 	game.load.image('background', 'images/football_field.jpg');
 	game.load.image('item', 'images/diamant_red.png');
+	game.load.audio('bumm', 'images/PulseGun.mp3');
+	game.load.audio('boom', 'images')
 }
 
 // diese Funktion wird als zweites aufgerufen und erzeugt das Spiel, die Spieler und den Ball
 function create () {
+	bumm = game.add.audio('bumm');
 	// Spiel wird erstellt
 	game.physics.startSystem(Phaser.Physics.ARCADE);
 	// Spielfeld wird erstellt und die Grafik 'background' als Hintergrund genutzt
@@ -69,6 +74,7 @@ function create () {
 	createItem();
 	//hier wird ein Gegenstand erzeugt
 	//createItem();
+	game.sound.setDecodedCallback([ bumm ], startGame, this);
 }
 
 // Anlegen eines Spielers mit Position, Bild und zwei Tasten zur Steuerung
@@ -129,7 +135,7 @@ function createItem() {
 	item.anchor.setTo(0.5, 0.5);
 	item.body.collideWorldBounds = true;
 	item.body.immovable = false;
-	item.body.velocity.y = 200;
+	item.body.velocity.y = 0;
 	items.push(item);
 	return item;
 }
@@ -174,6 +180,8 @@ function update () {
 	game.physics.arcade.collide(items, ball, hitItem);
 	game.physics.arcade.collide(player1, items, hitPlayer);
 	game.physics.arcade.collide(player2, items, hitPlayer);
+
+	player2.x = ball.x;
 }
 function hitPlayer(player, item) {
 	//if(player === player2) {
@@ -185,7 +193,7 @@ function hitPlayer(player, item) {
 	createItem();
 } 
 function hitItem(item, ball) {
-	
+	bumm.play();
 	var actions = [speedUpBall, growBall, shrinkBall,growPlayer1,shrinkPlayer1,growPlayer2,shrinkPlayer2,eggBall,reeggBall];
 	//var actions = [];
 	var random = Math.floor(Math.random() * actions.length);
@@ -201,28 +209,28 @@ function speedUpBall() {
 }
 
 function growBall() {
-	ball.width = ball.width + 10;
-	ball.height = ball.height + 10;
+	ball.width = ball.width + 40;
+	ball.height = ball.height + 40;
 }
 function shrinkBall() {
-	ball.width = ball.width - 10;
-	ball.height = ball.height - 10;
+	ball.width = ball.width - 40;
+	ball.height = ball.height - 40;
 }
 function shrinkPlayer1() {
-	player1.width = player1.width - 10;
-	player1.height = player1.height - 10;
+	player1.width = player1.width - 40;
+	player1.height = player1.height - 40;
 }
 function growPlayer1() {
-	player1.width = player1.width + 10;
-	player1.height = player1.height + 10;
+	player1.width = player1.width + 40;
+	player1.height = player1.height + 40;
 }
 function shrinkPlayer2() {
-	player2.width = player2.width - 10;
-	player2.height = player2.height - 10;
+	player2.width = player2.width - 40;
+	player2.height = player2.height - 40;
 }
 function growPlayer2(){
-	player2.width = player2.width + 10;
-	player2.height = player2.height + 10;
+	player2.width = player2.width + 40;
+	player2.height = player2.height + 40;
 }
 function eggBall(){
 	ball.height = ball.height + 5;
@@ -264,6 +272,7 @@ function positionBallAtCenter () {
 
 // startet das Spiel indem der Ball nach rechts oben geschossen wird
 function startGame() {
+	
 	ball.body.velocity.x = BALL_SPEED;
 	ball.body.velocity.y = -BALL_SPEED;
 }
