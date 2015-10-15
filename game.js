@@ -33,11 +33,20 @@ Jumper.Play.prototype = {
     // create hero
     this.heroCreate();
 
-
-
     // cursor controls
     this.cursor = this.input.keyboard.createCursorKeys();
+
+    this.createScores();
   },
+
+createScores: function() {
+var style = { font: "30px Arial", fill: "red", align: "left" };
+this.score = game.add.text(10, 10, 0, style);
+
+
+},
+
+
   update: function() {
     // this is where the main magic happens
     // the y offset and the height of the world are adjusted
@@ -93,24 +102,24 @@ hero.body.velocity.x -= 20;
     // create the base platform, with buffer on either side so that the hero doesn't fall through
     this.platformsCreateOne( -16, this.world.height - 16, this.world.width + 16 );
     // create a batch of platforms that start to move up the level
-    for( var i = 9; i < 9; i++ ) {
+    for( var i = 0; i < 9; i++ ) {
       this.platformsCreateOne( this.rnd.integerInRange( 0, this.world.width - 50 ), this.world.height - 100 - 100 * i, 50 );
     }
   },
 
 createelement: function( x, y, platform ) {
 
-var element = this.elements.getFirstDead();
-  //var element = game.add.sprite( platform.x +16, platform.y - 18 , 'hero' );
-  try {
-    element.reset( x, y );
-    element.anchor.set( 0.5 );
-    element.body.immovable = true;
-  } catch(e) {
-  }
+  var element = this.elements.getFirstDead();
+    //var element = game.add.sprite( platform.x +16, platform.y - 18 , 'hero' );
+    try {
+      element.reset( x, y );
+      element.anchor.set( 0.5 );
+      element.body.immovable = true;
+    } catch(e) {
+    }
 
-//element.collideWorldBounce=true;
-//this.elements.push(element);
+  //element.collideWorldBounce=true;
+  //this.elements.push(element);
 },
   platformsCreateOne: function( x, y, width ) {
     // this is a helper function since writing all of this out can get verbose elsewhere
@@ -120,7 +129,7 @@ var element = this.elements.getFirstDead();
     platform.scale.y = 16;
     platform.body.immovable = true;
 
-this.createelement(x, y, platform);
+  this.createelement(x, y, platform);
 
     return platform;
   },
@@ -156,7 +165,10 @@ this.createelement(x, y, platform);
     // handle hero jumping
     if( this.cursor.up.isDown && this.hero.body.touching.down ) {
       this.hero.body.velocity.y = -350;
+      this.score.text = parseInt(this.score.text) + 1;
     } 
+
+    this.score.y= this.hero.y-350 ;
     
     // wrap world coordinated so that you can warp from left to right and right to left
     this.world.wrap( this.hero, this.hero.width / 2, false );
